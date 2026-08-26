@@ -106,7 +106,31 @@ Without `TIMEPLUS_URL` only the offline unit tests run. Use the compose file
 (or `docker/proton/config.d/dsh-dev.yaml`) for test servers: a default
 Proton preallocates a 2 GB segment per stream, and the suites create a few.
 
+A `Makefile` wraps the common flows (`make help` lists them):
+
+```sh
+make install
+make proton-up test        # start Proton, run the full suite
+make typecheck
+```
+
 Start with [DESIGN.md](DESIGN.md), then [CLAUDE.md](CLAUDE.md).
+
+## Releasing
+
+The two packages version and release **independently**, each tagged
+`<npm-name>@<version>` (e.g. `@timeplus/dsh-session-query@0.0.1`). GitHub
+Releases are per package with per-package notes; a monorepo has no single
+"latest", so releases are created with `--latest=false`.
+
+```sh
+make bump-query VER=patch          # edit packages/.../package.json, then commit
+make release-query                 # build → npm publish → scoped tag → GitHub release
+```
+
+`make release-<pkg>` refuses a dirty tree (override with `ALLOW_DIRTY=1`), and
+the granular steps (`publish-*`, `tag-*`, `gh-release-*`) are available too.
+Requires `npm` logged in and `gh` authenticated.
 
 ## Status
 
