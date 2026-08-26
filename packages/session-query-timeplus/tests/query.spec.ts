@@ -50,6 +50,33 @@ describe.skipIf(TIMEPLUS_URL === undefined)('timeplus session-query behavior', (
     }
   }, 30_000)
 
+  it('ranks by match count first, then shorter document (deterministic)', async () => {
+    const { ctx, dispose } = await mount()
+    try {
+      await persistOnly(ctx, 'once-short', userTurn('alpha beta'))            // mc 1, len 10
+      await persistOnly(ctx, 'once-long', userTurn('alpha beta gamma delta')) // mc 1, len 22
+      await persistOnly(ctx, 'twice', userTurn('alpha beta then alpha beta')) // mc 2, len 26
+      const page = await ctx.sessionQuery.searchSessions({ query: 'alpha beta' })
+      // Higher match count wins outright; among equal counts the shorter doc wins.
+      expect(page.items.map(hit => hit.header.id)).toEqual(['twice', 'once-short', 'once-long'])
+      expect(page.items.map(hit => hit.bestMatch.seq)).toEqual([2, 2, 2])
+    } finally {
+      await dispose()
+    }
+  }, 30_000)
+
+  it('orders within-session event hits by match count then shorter document', async () => {
+    const { ctx, dispose } = await mount()
+    try {
+      // seq 2: 'alpha' once (len 5); seq 3: 'alpha alpha' twice (len 11); seq 4: 'alpha beta gamma' once (len 16)
+      const id = await persistOnly(ctx, 'events-rank', multiUserLog(['alpha', 'alpha alpha', 'alpha beta gamma']))
+      const page = await ctx.sessionQuery.searchEvents({ sessionId: id, query: 'alpha' })
+      expect(page.items.map(item => item.seq)).toEqual([3, 2, 4])
+    } finally {
+      await dispose()
+    }
+  }, 30_000)
+
   it('pages within-session event hits with a terminating, non-repeating cursor', async () => {
     const { ctx, dispose } = await mount()
     try {
