@@ -6,10 +6,11 @@ Verified against deepseek-harness commit `b150a551b8d465e31e418e1b2eaf5e79bbb7d2
 (`0.1.1-rc.2`, 2026-08-21) and Proton `3.0.29`: the upstream persistence
 contract (12 tests) and coordinator-orchestration contract (40 tests) both pass,
 plus this package's durability, primitive, codec, and Timeplus-vs-SQLite
-differential suites. The `@deepseek-ai/*` packages on npm (`0.0.1-rc.1`) predate
-the coordinator seam, so the package currently builds and tests against a
-sibling checkout of the upstream repo (see README → Development); pin real
-versions once upstream publishes `0.1.x`.
+differential suites, and an end-to-end install into the published
+`@deepseek-ai/dsh@0.1.1-rc.2` CLI via `dsh plugin add` (README → Install).
+`pnpm build` targets the published `@deepseek-ai/*@0.1.1-rc.2` packages; the
+test suites use a sibling upstream checkout because the contract suites are
+not published.
 
 ## 1. Goal
 
@@ -181,12 +182,14 @@ Config like SQLite does.
 ## 6. Configuration
 
 ```yaml
-# cordis.patch.yml — a patch cannot change a row's plugin name (cordis include
-# skips it with "name mismatch"), so disable the JSONL row and insert ours.
-- id: persistence                             # the bundle's jsonl row id
+# $DSH_HOME/profiles/<name>/cordis.patch.yml — a patch cannot change a row's
+# plugin name (cordis include skips it with "name mismatch"), so disable the
+# JSONL row and insert ours. Install the plugin first:
+#   dsh plugin --profile <name> add <path-to-tarball | npm spec>
+- id: session-persistence-jsonl               # the row from @deepseek-ai/dsh-base
   disabled: true
 - insert:
-    - id: timeplus-persistence
+    - id: session-persistence-timeplus
       name: '@timeplus/dsh-session-persistence'   # final npm name TBD
       config:
         url: http://localhost:8123            # Timeplus query/ingest endpoint

@@ -48,10 +48,11 @@ scripts/typecheck.mjs   tsc against upstream source, vendor diagnostics filtered
    → `awaitVisible`), never call `client.ingest` directly from store logic.
 6. Session ids and other values go into SQL as `{name:type}` parameters;
    identifiers go through `quoteIdentifier`. No string interpolation of data.
-7. Upstream is a moving preview: `@deepseek-ai/*` on npm (`0.0.1-rc.1`) predates
-   the coordinator seam, so package.json lists them as peers only and `pnpm
-   build` is not expected to work until upstream publishes `0.1.x`. Pin exact
-   versions then.
+7. Upstream is a moving preview. `pnpm build` (tsconfig.json) compiles against
+   the published `@deepseek-ai/*` packages pinned as devDependencies
+   (`0.1.1-rc.2`, matching the verified commit); peers use `^` ranges. On an
+   upstream bump: update the checkout, the pinned devDependencies, DESIGN.md's
+   verified commit, and re-run everything including the install path below.
 
 ## Verify
 
@@ -99,8 +100,16 @@ Suites (all skip without `TIMEPLUS_URL` except codec):
   database and is fine to leave behind.
 - **Profile patching**: a cordis `patches` entry cannot change a row's plugin
   `name` (skipped with "name mismatch"). To install this provider: disable the
-  bundle's JSONL row and `insert` a new row — README shows the shape, and
-  `smoke.spec.ts` generates exactly that config.
+  base bundle's `session-persistence-jsonl` row and `insert` a new row — README
+  shows the shape, and `smoke.spec.ts` generates exactly that config.
+- **Install path (verified)**: `pnpm pack` the package, then with the published
+  CLI: `dsh --profile headless --dump-config` (initializes
+  `$DSH_HOME/profiles/headless`), `dsh plugin --profile headless add <tgz>`
+  (pnpm in the profile dir; `@deepseek-ai/*` peers resolve through dsh's flat
+  fallback `$DSH_HOME/profiles/node_modules`, so no duplicate coordinator),
+  edit the profile's `cordis.patch.yml`, run. Without `DEEPSEEK_API_KEY` the
+  session still boots and persists up to the credential error — enough to see
+  rows land in `dsh_session_events`.
 - **Resume mechanics**: a resumed Session appends a `session/end-seed` marker
   before any new events; expect it in seq/row counts.
 
