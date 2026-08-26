@@ -14,7 +14,7 @@ streaming SQL — with no export pipeline.
 | Package | Seam | Status |
 |---|---|---|
 | [`@timeplus/dsh-session-persistence`](packages/session-persistence-timeplus) | `ctx.sessionPersistence` — durable source of truth | v1: passes the upstream persistence + coordinator contract suites (see [DESIGN.md](DESIGN.md)) |
-| `@timeplus/dsh-session-query` (planned) | `ctx.sessionQuery` — fleet-scale search & traces | — |
+| [`@timeplus/dsh-session-query`](packages/session-query-timeplus) | `ctx.sessionQuery` — fleet-scale full-text search over the event stream | v1: push-down search + ranking + cursors against live Proton ([#1](https://github.com/timeplus-io/dsh-timeplus/issues/1)) |
 
 Telemetry mirroring needs no plugin: point `dsh-session-telemetry-otel` at the
 Timeplus OTel ingest endpoint.
