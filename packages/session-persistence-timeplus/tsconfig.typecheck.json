@@ -1,0 +1,16 @@
+{
+  // Type-checks src + tests against the deepseek-harness checkout's source
+  // (its tsconfig.base.json `paths` map resolves every @deepseek-ai/* import).
+  // `tsconfig.json` remains the publishable build against released packages.
+  "extends": "../../../deepseek-harness/tsconfig.base.json",
+  "compilerOptions": {
+    "composite": false,
+    "incremental": false,
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "types": ["node"]
+  },
+  "include": ["src", "tests"]
+}

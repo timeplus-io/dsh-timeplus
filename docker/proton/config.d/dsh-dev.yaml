@@ -1,0 +1,14 @@
+# Development/CI overrides for a throwaway Proton (see docker-compose.yml).
+#
+# Proton's defaults preallocate a 2 GB NativeLog segment per stream and only
+# purge dropped streams every 5 minutes. The test suites create a fresh
+# stream per test file (and truncate between tests), so with the defaults a
+# full run needs tens of GB of transient disk. Production deployments should
+# keep Proton's defaults: the provider creates exactly two streams per store.
+data:
+  datastore:
+    log:
+      segment_size: 67108864      # 64 MB
+      min_size_to_keep: 67108864
+      preallocate: false
+      retention_check_ms: 10000

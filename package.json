@@ -1,0 +1,18 @@
+{
+  "name": "dsh-timeplus",
+  "private": true,
+  "type": "module",
+  "description": "Timeplus plugins for DeepSeek Harness (dsh)",
+  "license": "Apache-2.0",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "node scripts/typecheck.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.0",
+    "fast-check": "^4.8.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
+  }
+}

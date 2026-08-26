@@ -1,0 +1,17 @@
+# Throwaway Timeplus Proton for the test suites:
+#   docker compose up -d
+#   TIMEPLUS_URL=http://localhost:8123 pnpm test
+services:
+  proton:
+    image: timeplus/proton:latest
+    container_name: dsh-proton
+    ports:
+      - "8123:8123"   # HTTP (query + ingest) — what this provider uses
+      - "8463:8463"   # native TCP (proton-client), optional
+    volumes:
+      - ./docker/proton/config.d/dsh-dev.yaml:/etc/proton-server/config.d/dsh-dev.yaml:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf 'http://localhost:8123/?query=SELECT%201' || exit 1"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
